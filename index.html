@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iu. AIコーチ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+:root {
+  --pink: #ff8fab;
+  --orange: #ffb347;
+  --purple: #a78bfa;
+  --bg: #fff8f5;
+  --white: #ffffff;
+  --gray: #f5f5f5;
+  --text: #333;
+  --muted: #aaa;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); font-family: 'Noto Sans JP', sans-serif; color: var(--text); min-height: 100vh; }
+
+/* ヘッダー */
+header {
+  background: linear-gradient(135deg, var(--pink), var(--orange));
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(255,143,171,0.3);
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-logo { font-size: 20px; font-weight: 900; color: #fff; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,0.85); }
+.goal-chip {
+  background: rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+/* 目標バー */
+#goal-bar-section {
+  background: linear-gradient(135deg, #ffe0e9, #fff3e0);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.goal-label { font-size: 11px; font-weight: 700; color: var(--pink); white-space: nowrap; }
+.goal-track { flex: 1; height: 8px; background: rgba(255,143,171,0.2); border-radius: 4px; overflow: hidden; }
+.goal-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--orange)); border-radius: 4px; transition: width 0.8s ease; }
+.goal-pct-text { font-size: 12px; font-weight: 900; color: var(--pink); white-space: nowrap; }
+
+/* メイン */
+main { padding: 16px 16px 120px; display: flex; flex-direction: column; gap: 16px; }
+
+/* 月サマリーカード */
+#monthly-summary {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  display: none;
+}
+.summary-title { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 10px; letter-spacing: 0.05em; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.summary-item { text-align: center; }
+.summary-val { font-size: 18px; font-weight: 900; color: var(--text); }
+.summary-key { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* 履歴リスト */
+#history-list { display: flex; flex-direction: column; gap: 12px; }
+
+.history-card {
+  background: var(--white);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  animation: slideUp 0.4s ease;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.history-card-header {
+  padding: 10px 14px;
+  background: var(--gray);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+.history-card-date { font-weight: 700; }
+.history-card-del {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.history-screenshot {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.history-memo {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #555;
+  background: #fffaf8;
+  border-top: 1px solid #f0f0f0;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* AI結果 */
+.ai-result {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-result-loading {
+  text-align: center;
+  padding: 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.ai-result-loading .dots span {
+  display: inline-block; width: 7px; height: 7px;
+  background: #ddd; border-radius: 50%; margin: 0 3px;
+  animation: bounce 1.2s infinite;
+}
+.ai-result-loading .dots span:nth-child(2) { animation-delay: 0.2s; }
+.ai-result-loading .dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%,80%,100% { transform:scale(0.8); background:#ddd; }
+  40% { transform:scale(1.2); background:var(--purple); }
+}
+
+.result-block {
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.result-block.numbers { background: linear-gradient(135deg, #fff0f5, #fff8e7); }
+.result-block.coach { background: linear-gradient(135deg, #f0f0ff, #f5f0ff); }
+.result-block.action { background: linear-gradient(135deg, #f0fff4, #f0f9ff); }
+
+.result-block-title {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.result-block.numbers .result-block-title { color: var(--pink); }
+.result-block.coach .result-block-title { color: var(--purple); }
+.result-block.action .result-block-title { color: #34d399; }
+
+.result-block-text {
+  font-size: 13px;
+  line-height: 1.85;
+  color: #444;
+}
+.action-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 5px 0;
+  font-size: 13px;
+  color: #444;
+  line-height: 1.7;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.action-item:last-child { border-bottom: none; }
+.action-num {
+  min-width: 20px; height: 20px;
+  background: linear-gradient(135deg, var(--pink), var(--orange));
+  border-radius: 50%;
+  color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 2px; flex-shrink: 0;
+}
+
+/* 入力エリア（下固定） */
+#input-area {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--white);
+  border-top: 1px solid #f0f0f0;
+  padding: 12px 16px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  z-index: 200;
+}
+
+/* ドロップゾーン */
+#drop-zone {
+  border: 2px dashed #ffb3c6;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  background: #fff8f5;
+  position: relative;
+}
+#drop-zone.drag-over { border-color: var(--pink); background: #fff0f5; }
+#drop-zone.has-image { border-style: solid; border-color: var(--pink); }
+#drop-zone-text { font-size: 12px; color: var(--muted); }
+#drop-zone-text strong { color: var(--pink); }
+#preview-img {
+  width: 100%; max-height: 80px; object-fit: cover;
+  border-radius: 8px; display: none;
+}
+#file-input { display: none; }
+
+.input-row { display: flex; gap: 8px; align-items: flex-end; }
+#memo-input {
+  flex: 1;
+  border: 2px solid #ffe0e9;
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans JP', sans-serif;
+  outline: none;
+  color: var(--text);
+  resize: none;
+  min-height: 40px;
+  max-height: 80px;
+  line-height: 1.5;
+}
+#memo-input:focus { border-color: var(--pink); }
+#memo-input::placeholder { color: #ccc; }
+
+#send-btn {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--pink), var(--orange));
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 10px rgba(255,143,171,0.4);
+  flex-shrink: 0;
+  transition: transform 0.1s;
+}
+#send-btn:active { transform: scale(0.92); }
+#send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 目標設定モーダル */
+#goal-modal {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#goal-modal.open { display: flex; }
+.modal-box {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
+}
+.modal-title { font-size: 16px; font-weight: 900; margin-bottom: 16px; }
+.modal-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.modal-input {
+  width: 100%; border: 2px solid #ffe0e9; border-radius: 10px;
+  padding: 10px 12px; font-size: 16px;
+  font-family: 'Noto Sans JP', sans-serif; outline: none; color: var(--text);
+  margin-bottom: 14px;
+}
+.modal-input:focus { border-color: var(--pink); }
+.modal-btns { display: flex; gap: 8px; }
+.modal-cancel {
+  flex: 1; padding: 10px; background: var(--gray); border: none;
+  border-radius: 10px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+}
+.modal-ok {
+  flex: 2; padding: 10px;
+  background: linear-gradient(135deg, var(--pink), var(--orange));
+  border: none; border-radius: 10px; color: #fff;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+}
+
+/* 空状態 */
+#empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+#empty-state .big { font-size: 48px; margin-bottom: 12px; }
+#empty-state p { font-size: 14px; line-height: 1.8; }
+
+/* 月タブ */
+#month-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+#month-tabs::-webkit-scrollbar { display: none; }
+.month-tab {
+  flex-shrink: 0;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 2px solid #ffe0e9;
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.month-tab.active { background: linear-gradient(135deg, var(--pink), var(--orange)); color: #fff; border-color: transparent; }
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header>
+  <div class="header-left">
+    <div>
+      <div class="header-logo">💅 iu. AIコーチ</div>
+      <div class="header-sub">いくほさん専用・経営サポート</div>
+    </div>
+  </div>
+  <div class="goal-chip" onclick="openGoalModal()">🎯 目標設定</div>
+</header>
+
+<!-- 目標バー -->
+<div id="goal-bar-section">
+  <div class="goal-label">今月 <span id="goal-month-label">—</span></div>
+  <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
+  <div class="goal-pct-text" id="goal-pct-text">-%</div>
+</div>
+
+<!-- メイン -->
+<main>
+
+  <!-- 月サマリー -->
+  <div id="monthly-summary">
+    <div class="summary-title">📊 今月の累計</div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-val" id="sum-revenue">¥0</div>
+        <div class="summary-key">売上合計</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val" id="sum-clients">0人</div>
+        <div class="summary-key">来客数</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val" id="sum-count">0回</div>
+        <div class="summary-key">記録数</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 月タブ -->
+  <div id="month-tabs"></div>
+
+  <!-- 空状態 -->
+  <div id="empty-state">
+    <div class="big">📸</div>
+    <p>カルテカンのスクショを貼って<br>「分析して！」って送るだけ💕<br><br>売上・メニュー・来客数…<br>なんでもOK！AIが読んで<br>コーチしてくれるよ🤖</p>
+  </div>
+
+  <!-- 履歴 -->
+  <div id="history-list"></div>
+
+</main>
+
+<!-- 入力エリア -->
+<div id="input-area">
+  <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+    <img id="preview-img" alt="preview">
+    <div id="drop-zone-text">📸 <strong>スクショをここにペースト or タップして選択</strong></div>
+    <input type="file" id="file-input" accept="image/*">
+  </div>
+  <div class="input-row">
+    <textarea id="memo-input" placeholder="一言メモ（今日の様子・気になること）" rows="1"></textarea>
+    <button id="send-btn" onclick="submit()" title="送信">🚀</button>
+  </div>
+</div>
+
+<!-- 目標設定モーダル -->
+<div id="goal-modal">
+  <div class="modal-box">
+    <div class="modal-title">🎯 月商目標を設定</div>
+    <div class="modal-label">目標金額（円）</div>
+    <input type="number" class="modal-input" id="modal-goal-input" placeholder="1500000">
+    <div class="modal-label">今月の売上（わかれば入力）</div>
+    <input type="number" class="modal-input" id="modal-revenue-input" placeholder="0">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeGoalModal()">キャンセル</button>
+      <button class="modal-ok" onclick="saveGoal()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== データ管理 ======
+const STORAGE_KEY = 'iu_coach_v2';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { goal: 1500000, revenue: 0, records: [] }; }
+  catch { return { goal: 1500000, revenue: 0, records: [] }; }
+}
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+let appData = loadData();
+let currentMonth = getCurrentMonth();
+let selectedImage = null;
+
+function getCurrentMonth() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function formatMonth(ym) {
+  const [y, m] = ym.split('-');
+  return `${y}年${parseInt(m)}月`;
+}
+function formatDate(iso) {
+  const d = new Date(iso);
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+// ====== 目標バー ======
+function updateGoalBar() {
+  const pct = Math.min(100, Math.round(appData.revenue / appData.goal * 100));
+  document.getElementById('goal-fill').style.width = pct + '%';
+  document.getElementById('goal-pct-text').textContent = pct + '%';
+  document.getElementById('goal-month-label').textContent = formatMonth(currentMonth);
+}
+
+// ====== 月タブ ======
+function getMonths() {
+  const months = [...new Set(appData.records.map(r => r.month))];
+  if (!months.includes(currentMonth)) months.unshift(currentMonth);
+  return months.sort().reverse();
+}
+function renderMonthTabs() {
+  const months = getMonths();
+  const tabs = document.getElementById('month-tabs');
+  tabs.innerHTML = months.map(m => `
+    <div class="month-tab ${m === currentMonth ? 'active' : ''}" onclick="selectMonth('${m}')">
+      ${formatMonth(m)}
+    </div>`).join('');
+}
+function selectMonth(m) {
+  currentMonth = m;
+  renderMonthTabs();
+  renderHistory();
+  updateGoalBar();
+}
+
+// ====== サマリー ======
+function updateSummary() {
+  const records = appData.records.filter(r => r.month === currentMonth && r.parsed);
+  if (records.length === 0) {
+    document.getElementById('monthly-summary').style.display = 'none';
+    return;
+  }
+  document.getElementById('monthly-summary').style.display = 'block';
+  const totalRevenue = records.reduce((s, r) => s + (r.parsed.revenue || 0), 0);
+  const totalClients = records.reduce((s, r) => s + (r.parsed.clients || 0), 0);
+  document.getElementById('sum-revenue').textContent = totalRevenue > 0 ? '¥' + totalRevenue.toLocaleString() : '—';
+  document.getElementById('sum-clients').textContent = totalClients > 0 ? totalClients + '人' : '—';
+  document.getElementById('sum-count').textContent = records.length + '回';
+  if (totalRevenue > 0) appData.revenue = totalRevenue;
+  updateGoalBar();
+}
+
+// ====== 履歴レンダリング ======
+function renderHistory() {
+  const records = appData.records.filter(r => r.month === currentMonth).slice().reverse();
+  const list = document.getElementById('history-list');
+  const empty = document.getElementById('empty-state');
+
+  if (records.length === 0) {
+    empty.style.display = 'block';
+    list.innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = records.map(r => `
+    <div class="history-card" id="card-${r.id}">
+      <div class="history-card-header">
+        <span class="history-card-date">📅 ${formatDate(r.date)}</span>
+        <button class="history-card-del" onclick="deleteRecord('${r.id}')">✕</button>
+      </div>
+      ${r.imageData ? `<img class="history-screenshot" src="${r.imageData}" alt="スクショ">` : ''}
+      ${r.memo ? `<div class="history-memo">「${r.memo}」</div>` : ''}
+      <div class="ai-result" id="result-${r.id}">
+        ${r.result ? renderResultHTML(r.result) : `<div class="ai-result-loading"><div class="dots"><span></span><span></span><span></span></div><div style="margin-top:8px">分析中…</div></div>`}
+      </div>
+    </div>`).join('');
+
+  updateSummary();
+}
+
+function renderResultHTML(result) {
+  if (result.error) return `<div style="color:#ccc;font-size:13px;text-align:center;padding:8px">うまく読み取れんかった😢<br>もう一度スクショを送ってみてね</div>`;
+
+  return `
+    <div class="result-block numbers">
+      <div class="result-block-title">💰 読み取った数字</div>
+      <div class="result-block-text">${result.numbers}</div>
+    </div>
+    <div class="result-block coach">
+      <div class="result-block-title">🤖 コーチからのひと言</div>
+      <div class="result-block-text">${result.coach}</div>
+    </div>
+    <div class="result-block action">
+      <div class="result-block-title">📋 今すぐやること</div>
+      <div>
+        ${(result.actions||[]).map((a,i) => `
+          <div class="action-item">
+            <div class="action-num">${i+1}</div>
+            <div>${a}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ====== 送信 ======
+async function submit() {
+  const memo = document.getElementById('memo-input').value.trim();
+  if (!selectedImage && !memo) {
+    alert('スクショか一言メモを入れてね！');
+    return;
+  }
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+
+  const record = {
+    id: Date.now().toString(),
+    month: currentMonth,
+    date: new Date().toISOString(),
+    imageData: selectedImage || null,
+    memo: memo || null,
+    result: null,
+    parsed: null
+  };
+
+  appData.records.push(record);
+  saveData(appData);
+
+  // リセット
+  selectedImage = null;
+  document.getElementById('preview-img').style.display = 'none';
+  document.getElementById('drop-zone-text').style.display = 'block';
+  document.getElementById('drop-zone').classList.remove('has-image');
+  document.getElementById('memo-input').value = '';
+
+  renderMonthTabs();
+  renderHistory();
+
+  // AI分析
+  try {
+    const result = await runAI(record);
+    const idx = appData.records.findIndex(r => r.id === record.id);
+    if (idx !== -1) {
+      appData.records[idx].result = result;
+      appData.records[idx].parsed = result.parsed || null;
+      saveData(appData);
+    }
+    const el = document.getElementById(`result-${record.id}`);
+    if (el) el.innerHTML = renderResultHTML(result);
+    updateSummary();
+  } catch(e) {
+    const idx = appData.records.findIndex(r => r.id === record.id);
+    if (idx !== -1) { appData.records[idx].result = { error: true }; saveData(appData); }
+    const el = document.getElementById(`result-${record.id}`);
+    if (el) el.innerHTML = `<div style="color:#ccc;font-size:13px;text-align:center;padding:8px">AI分析に失敗しました😢</div>`;
+  }
+
+  btn.disabled = false;
+}
+
+// ====== AI分析 ======
+async function runAI(record) {
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const season = month >= 3 && month <= 5 ? '春' : month >= 6 && month <= 8 ? '夏' : month >= 9 && month <= 11 ? '秋' : '冬';
+
+  // 過去の累積データ
+  const pastRecords = appData.records.filter(r => r.month === record.month && r.parsed);
+  const totalRevSoFar = pastRecords.reduce((s, r) => s + (r.parsed.revenue || 0), 0);
+  const remaining = appData.goal - totalRevSoFar;
+
+  const prompt = `あなたは美容サロン「iu.」（京都・アイリスト・個人サロン）のオーナー・いくほさんの専属AIコーチです。経理もコーチングも両方やります。
+
+【いくほさんのサロン情報】
+- 主力メニュー：アゲエク（ラッシュリフト＋エクステ）、通常エクステ、ラッシュリフト単体
+- 自社商品：ぬくみずホルダー、KYO-KURAグルー、Shiki Bonder、沁みブロックパック
+- 月商目標：¥${appData.goal.toLocaleString()}
+- 今月の累計売上（このデータ以前）：¥${totalRevSoFar.toLocaleString()}
+- 目標まで残り：¥${remaining.toLocaleString()}
+- 現在の季節：${season}（${month}月）
+
+【送られてきた情報】
+メモ：${record.memo || 'なし'}
+${record.imageData ? '※スクショ画像あり（添付）' : '※画像なし'}
+
+以下を必ずやってください：
+1. 画像から数字（売上・来客数・メニュー名・人数など）を読み取る
+2. 今の季節（${season}）に合わせた提案をする
+3. 目標達成のための具体的アドバイスをする
+4. わかりやすい言葉で、友達みたいに話しかける感じで
+
+JSONのみ返してください：
+{
+  "numbers": "読み取った数字や情報（売上・来客・メニューなど、わかりやすく）",
+  "coach": "コーチからのひと言（目標の進捗＋季節に合わせた商品・メニュー提案＋まつげアドバイス）",
+  "actions": ["今すぐやること1", "今すぐやること2", "今すぐやること3"],
+  "parsed": {"revenue": 数字か0, "clients": 数字か0}
+}`;
+
+  const messages = [{ role: 'user', content: [] }];
+
+  if (record.imageData) {
+    const base64 = record.imageData.split(',')[1];
+    const mediaType = record.imageData.split(';')[0].split(':')[1];
+    messages[0].content.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } });
+  }
+  messages[0].content.push({ type: 'text', text: prompt });
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages })
+  });
+
+  const data = await res.json();
+  const text = data.content[0].text.replace(/```json|```/g, '').trim();
+  return JSON.parse(text);
+}
+
+// ====== 削除 ======
+function deleteRecord(id) {
+  if (!confirm('この記録を削除する？')) return;
+  appData.records = appData.records.filter(r => r.id !== id);
+  saveData(appData);
+  renderMonthTabs();
+  renderHistory();
+  updateSummary();
+}
+
+// ====== 目標モーダル ======
+function openGoalModal() {
+  document.getElementById('modal-goal-input').value = appData.goal;
+  document.getElementById('modal-revenue-input').value = appData.revenue || '';
+  document.getElementById('goal-modal').classList.add('open');
+}
+function closeGoalModal() { document.getElementById('goal-modal').classList.remove('open'); }
+function saveGoal() {
+  const g = parseInt(document.getElementById('modal-goal-input').value);
+  const r = parseInt(document.getElementById('modal-revenue-input').value) || 0;
+  if (g) { appData.goal = g; appData.revenue = r; saveData(appData); updateGoalBar(); }
+  closeGoalModal();
+}
+
+// ====== 画像選択 ======
+document.getElementById('file-input').addEventListener('change', e => {
+  if (e.target.files[0]) loadImage(e.target.files[0]);
+});
+
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]);
+});
+
+// ペースト対応
+document.addEventListener('paste', e => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) { loadImage(item.getAsFile()); break; }
+  }
+});
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    selectedImage = e.target.result;
+    const img = document.getElementById('preview-img');
+    img.src = selectedImage;
+    img.style.display = 'block';
+    document.getElementById('drop-zone-text').style.display = 'none';
+    dz.classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ====== テキストエリア自動リサイズ ======
+const ta = document.getElementById('memo-input');
+ta.addEventListener('input', () => {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 80) + 'px';
+});
+
+// ====== 初期化 ======
+updateGoalBar();
+renderMonthTabs();
+renderHistory();
+</script>
+</body>
+</html>
