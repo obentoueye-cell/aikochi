@@ -3,238 +3,253 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iu. AIコーチ</title>
+<title>AI経営コーチ | OBENTOUeye</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&display=swap');
 
 :root {
   --pink: #ff8fab;
   --orange: #ffb347;
-  --purple: #a78bfa;
-  --bg: #fff8f5;
+  --peach: #ffd6a5;
+  --purple: #c084fc;
+  --green: #6ee7b7;
+  --bg: #fdf8f5;
   --white: #ffffff;
-  --gray: #f5f5f5;
-  --text: #333;
-  --muted: #aaa;
+  --surface: #fff5f0;
+  --border: #ffe4d6;
+  --text: #2d2320;
+  --muted: #b09a94;
+  --shadow: 0 4px 20px rgba(255,100,80,0.08);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { background: var(--bg); font-family: 'Noto Sans JP', sans-serif; color: var(--text); min-height: 100vh; }
 
-/* ヘッダー */
-header {
+/* ===== セットアップ画面 ===== */
+#setup-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px 40px;
+  background: linear-gradient(160deg, #fff5f0 0%, #fdf8f5 60%, #f5f0ff 100%);
+}
+.setup-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.setup-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.setup-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 32px;
+  text-align: center;
+  line-height: 1.7;
+}
+.setup-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--white);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.setup-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pink);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin: 20px 0 12px;
+}
+.setup-section-title:first-child { margin-top: 0; }
+.setup-field { margin-bottom: 12px; }
+.setup-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #666;
+  margin-bottom: 6px;
+  display: block;
+}
+.setup-input {
+  width: 100%;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 15px;
+  font-family: 'Noto Sans JP', sans-serif;
+  outline: none;
+  color: var(--text);
+  background: var(--bg);
+  transition: border-color 0.2s;
+}
+.setup-input:focus { border-color: var(--pink); background: var(--white); }
+.setup-input::placeholder { color: #ccc; }
+.setup-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.6;
+}
+.setup-hint a { color: var(--pink); }
+.setup-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
   background: linear-gradient(135deg, var(--pink), var(--orange));
-  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(255,143,171,0.4);
+  transition: transform 0.1s;
+}
+.setup-btn:active { transform: scale(0.98); }
+.setup-credit {
+  margin-top: 24px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+/* ===== メイン画面 ===== */
+#main-screen { display: none; }
+
+/* ヘッダー */
+.app-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 12px rgba(255,143,171,0.3);
 }
-.header-left { display: flex; align-items: center; gap: 10px; }
-.header-logo { font-size: 20px; font-weight: 900; color: #fff; }
-.header-sub { font-size: 11px; color: rgba(255,255,255,0.85); }
-.goal-chip {
-  background: rgba(255,255,255,0.25);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 11px;
-  color: #fff;
-  font-weight: 700;
+.app-header-left { display: flex; align-items: center; gap: 10px; }
+.salon-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--pink), var(--orange));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.salon-name { font-size: 14px; font-weight: 900; color: var(--text); }
+.salon-owner { font-size: 10px; color: var(--muted); }
+.header-settings {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.4);
 }
 
 /* 目標バー */
-#goal-bar-section {
-  background: linear-gradient(135deg, #ffe0e9, #fff3e0);
+.goal-strip {
+  background: linear-gradient(135deg, var(--pink), var(--orange));
   padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 10px;
+  color: #fff;
 }
-.goal-label { font-size: 11px; font-weight: 700; color: var(--pink); white-space: nowrap; }
-.goal-track { flex: 1; height: 8px; background: rgba(255,143,171,0.2); border-radius: 4px; overflow: hidden; }
-.goal-fill { height: 100%; background: linear-gradient(90deg, var(--pink), var(--orange)); border-radius: 4px; transition: width 0.8s ease; }
-.goal-pct-text { font-size: 12px; font-weight: 900; color: var(--pink); white-space: nowrap; }
+.goal-strip-label { font-size: 11px; opacity: 0.9; flex-shrink: 0; }
+.goal-strip-track { flex: 1; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; overflow: hidden; }
+.goal-strip-fill { height: 100%; background: #fff; border-radius: 3px; transition: width 0.8s; }
+.goal-strip-pct { font-size: 13px; font-weight: 900; flex-shrink: 0; }
 
-/* メイン */
-main { padding: 16px 16px 120px; display: flex; flex-direction: column; gap: 16px; }
-
-/* 月サマリーカード */
-#monthly-summary {
-  background: var(--white);
-  border-radius: 20px;
-  padding: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  display: none;
-}
-.summary-title { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 10px; letter-spacing: 0.05em; }
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.summary-item { text-align: center; }
-.summary-val { font-size: 18px; font-weight: 900; color: var(--text); }
-.summary-key { font-size: 10px; color: var(--muted); margin-top: 2px; }
-
-/* 履歴リスト */
-#history-list { display: flex; flex-direction: column; gap: 12px; }
-
-.history-card {
-  background: var(--white);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  animation: slideUp 0.4s ease;
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.history-card-header {
-  padding: 10px 14px;
-  background: var(--gray);
+/* ナビ */
+.nav {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--muted);
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-.history-card-date { font-weight: 700; }
-.history-card-del {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 16px;
-  cursor: pointer;
-  padding: 0 4px;
-}
-
-.history-screenshot {
-  width: 100%;
-  max-height: 200px;
-  object-fit: cover;
-  display: block;
-}
-
-.history-memo {
-  padding: 10px 14px;
-  font-size: 13px;
-  color: #555;
-  background: #fffaf8;
-  border-top: 1px solid #f0f0f0;
-  line-height: 1.6;
-  font-style: italic;
-}
-
-/* AI結果 */
-.ai-result {
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.ai-result-loading {
-  text-align: center;
-  padding: 16px;
-  color: var(--muted);
-  font-size: 13px;
-}
-.ai-result-loading .dots span {
-  display: inline-block; width: 7px; height: 7px;
-  background: #ddd; border-radius: 50%; margin: 0 3px;
-  animation: bounce 1.2s infinite;
-}
-.ai-result-loading .dots span:nth-child(2) { animation-delay: 0.2s; }
-.ai-result-loading .dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce {
-  0%,80%,100% { transform:scale(0.8); background:#ddd; }
-  40% { transform:scale(1.2); background:var(--purple); }
-}
-
-.result-block {
-  border-radius: 14px;
-  padding: 12px 14px;
-}
-.result-block.numbers { background: linear-gradient(135deg, #fff0f5, #fff8e7); }
-.result-block.coach { background: linear-gradient(135deg, #f0f0ff, #f5f0ff); }
-.result-block.action { background: linear-gradient(135deg, #f0fff4, #f0f9ff); }
-
-.result-block-title {
-  font-size: 11px;
+.nav::-webkit-scrollbar { display: none; }
+.nav-item {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  font-size: 12px;
   font-weight: 700;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
 }
-.result-block.numbers .result-block-title { color: var(--pink); }
-.result-block.coach .result-block-title { color: var(--purple); }
-.result-block.action .result-block-title { color: #34d399; }
+.nav-item.active { color: var(--pink); border-bottom-color: var(--pink); }
 
-.result-block-text {
-  font-size: 13px;
-  line-height: 1.85;
-  color: #444;
-}
-.action-item {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  padding: 5px 0;
-  font-size: 13px;
-  color: #444;
-  line-height: 1.7;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-.action-item:last-child { border-bottom: none; }
-.action-num {
-  min-width: 20px; height: 20px;
-  background: linear-gradient(135deg, var(--pink), var(--orange));
-  border-radius: 50%;
-  color: #fff; font-size: 10px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  margin-top: 2px; flex-shrink: 0;
-}
+/* ページ */
+.page { display: none; padding: 16px 16px 100px; }
+.page.active { display: block; }
 
-/* 入力エリア（下固定） */
-#input-area {
+/* 送信エリア（下固定） */
+.send-area {
   position: fixed;
   bottom: 0; left: 0; right: 0;
   background: var(--white);
-  border-top: 1px solid #f0f0f0;
-  padding: 12px 16px;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  border-top: 1px solid var(--border);
+  padding: 10px 14px 14px;
   z-index: 200;
 }
-
-/* ドロップゾーン */
-#drop-zone {
-  border: 2px dashed #ffb3c6;
-  border-radius: 14px;
-  padding: 12px;
-  text-align: center;
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   cursor: pointer;
   margin-bottom: 8px;
   transition: all 0.2s;
-  background: #fff8f5;
-  position: relative;
+  background: var(--bg);
+  min-height: 52px;
 }
-#drop-zone.drag-over { border-color: var(--pink); background: #fff0f5; }
-#drop-zone.has-image { border-style: solid; border-color: var(--pink); }
-#drop-zone-text { font-size: 12px; color: var(--muted); }
-#drop-zone-text strong { color: var(--pink); }
-#preview-img {
-  width: 100%; max-height: 80px; object-fit: cover;
-  border-radius: 8px; display: none;
+.drop-zone.drag-over { border-color: var(--pink); background: #fff0f5; }
+.drop-zone.has-img { border-style: solid; border-color: var(--pink); }
+.drop-zone-label { font-size: 12px; color: var(--muted); flex: 1; }
+.drop-zone-label strong { color: var(--pink); }
+#preview-thumb {
+  width: 56px; height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: none;
+  flex-shrink: 0;
 }
-#file-input { display: none; }
-
-.input-row { display: flex; gap: 8px; align-items: flex-end; }
-#memo-input {
+.drop-zone-clear {
+  font-size: 18px;
+  color: var(--muted);
+  display: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#img-input { display: none; }
+.send-row { display: flex; gap: 8px; align-items: flex-end; }
+.memo-box {
   flex: 1;
-  border: 2px solid #ffe0e9;
+  border: 2px solid var(--border);
   border-radius: 12px;
   padding: 9px 12px;
   font-size: 13px;
@@ -243,497 +258,803 @@ main { padding: 16px 16px 120px; display: flex; flex-direction: column; gap: 16p
   color: var(--text);
   resize: none;
   min-height: 40px;
-  max-height: 80px;
+  max-height: 90px;
   line-height: 1.5;
+  background: var(--bg);
 }
-#memo-input:focus { border-color: var(--pink); }
-#memo-input::placeholder { color: #ccc; }
-
-#send-btn {
+.memo-box:focus { border-color: var(--pink); background: var(--white); }
+.memo-box::placeholder { color: #ccc; }
+.send-btn {
   width: 44px; height: 44px;
   background: linear-gradient(135deg, var(--pink), var(--orange));
-  border: none;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 18px;
+  border: none; border-radius: 50%;
+  color: #fff; font-size: 20px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 3px 10px rgba(255,143,171,0.4);
+  box-shadow: 0 4px 14px rgba(255,143,171,0.5);
   flex-shrink: 0;
   transition: transform 0.1s;
 }
-#send-btn:active { transform: scale(0.92); }
-#send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.send-btn:active { transform: scale(0.9); }
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* 目標設定モーダル */
-#goal-modal {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 300;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-#goal-modal.open { display: flex; }
-.modal-box {
+/* カード */
+.card {
   background: var(--white);
-  border-radius: 20px;
-  padding: 24px;
-  width: 100%;
-  max-width: 320px;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
 }
-.modal-title { font-size: 16px; font-weight: 900; margin-bottom: 16px; }
-.modal-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-.modal-input {
-  width: 100%; border: 2px solid #ffe0e9; border-radius: 10px;
-  padding: 10px 12px; font-size: 16px;
-  font-family: 'Noto Sans JP', sans-serif; outline: none; color: var(--text);
-  margin-bottom: 14px;
-}
-.modal-input:focus { border-color: var(--pink); }
-.modal-btns { display: flex; gap: 8px; }
-.modal-cancel {
-  flex: 1; padding: 10px; background: var(--gray); border: none;
-  border-radius: 10px; font-size: 13px; font-weight: 700;
-  cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
-}
-.modal-ok {
-  flex: 2; padding: 10px;
-  background: linear-gradient(135deg, var(--pink), var(--orange));
-  border: none; border-radius: 10px; color: #fff;
-  font-size: 13px; font-weight: 700;
-  cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* 空状態 */
-#empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--muted);
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.kpi { background: var(--white); border-radius: 14px; padding: 13px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+.kpi.full { grid-column: 1 / -1; }
+.kpi-icon { font-size: 18px; margin-bottom: 4px; }
+.kpi-label { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+.kpi-val { font-size: 20px; font-weight: 900; }
+.kpi-val.big { font-size: 26px; }
+.kpi-desc { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+/* チャット履歴 */
+.chat-list { display: flex; flex-direction: column; gap: 14px; }
+.chat-card {
+  background: var(--white);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  animation: popIn 0.35s ease;
 }
-#empty-state .big { font-size: 48px; margin-bottom: 12px; }
-#empty-state p { font-size: 14px; line-height: 1.8; }
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.chat-card-head {
+  padding: 10px 14px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.chat-card-date { font-weight: 700; color: #888; }
+.chat-del { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+.chat-img { width: 100%; max-height: 180px; object-fit: cover; display: block; }
+.chat-memo {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #555;
+  font-style: italic;
+  background: #fffaf8;
+  border-top: 1px solid var(--border);
+  line-height: 1.6;
+}
+
+/* AI結果 */
+.ai-wrap { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.ai-loading { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
+.dots span {
+  display: inline-block; width: 7px; height: 7px;
+  background: #ddd; border-radius: 50%; margin: 0 3px;
+  animation: bounce 1.2s infinite;
+}
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0.8);background:#ddd;} 40%{transform:scale(1.3);background:var(--pink);} }
+
+.ai-block { border-radius: 14px; padding: 12px 14px; }
+.ai-block.nums { background: linear-gradient(135deg, #fff5f0, #fff8f0); border: 1px solid #ffe4cc; }
+.ai-block.coach { background: linear-gradient(135deg, #f5f0ff, #f0f5ff); border: 1px solid #e0d0ff; }
+.ai-block.acts { background: linear-gradient(135deg, #f0fff8, #f0fff5); border: 1px solid #c0f0d8; }
+.ai-block-title {
+  font-size: 11px; font-weight: 700; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.ai-block.nums .ai-block-title { color: var(--orange); }
+.ai-block.coach .ai-block-title { color: var(--purple); }
+.ai-block.acts .ai-block-title { color: #10b981; }
+.ai-block-text { font-size: 13px; line-height: 1.85; color: #444; }
+.act-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+  font-size: 13px; color: #444; line-height: 1.7;
+}
+.act-item:last-child { border: none; padding-bottom: 0; }
+.act-num {
+  min-width: 20px; height: 20px;
+  background: linear-gradient(135deg, var(--pink), var(--orange));
+  border-radius: 50%; color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; margin-top: 2px; flex-shrink: 0;
+}
+
+/* メニューランキング */
+.menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid #f5f5f5;
+}
+.menu-item:last-child { border: none; }
+.menu-rank {
+  min-width: 24px; height: 24px;
+  border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.menu-rank.top { background: linear-gradient(135deg, var(--pink), var(--orange)); }
+.menu-rank.mid { background: #e0e0e0; color: #999; }
+.menu-name { flex: 1; font-size: 13px; }
+.menu-cnt { font-size: 13px; font-weight: 700; color: var(--pink); }
 
 /* 月タブ */
-#month-tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.month-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; scrollbar-width: none; }
+.month-chips::-webkit-scrollbar { display: none; }
+.month-chip {
+  flex-shrink: 0; padding: 5px 14px;
+  border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--white); font-size: 12px; font-weight: 700;
+  color: var(--pink); cursor: pointer; transition: all 0.15s;
 }
-#month-tabs::-webkit-scrollbar { display: none; }
-.month-tab {
-  flex-shrink: 0;
-  padding: 5px 14px;
-  border-radius: 20px;
-  border: 2px solid #ffe0e9;
-  background: var(--white);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--pink);
-  cursor: pointer;
-  transition: all 0.15s;
+.month-chip.active { background: linear-gradient(135deg, var(--pink), var(--orange)); color: #fff; border-color: transparent; }
+
+/* 比較表 */
+.cmp-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.cmp-table th, .cmp-table td { padding: 9px 6px; text-align: right; border-bottom: 1px solid #f0f0f0; }
+.cmp-table th { background: #fafafa; font-weight: 700; color: #888; font-size: 11px; }
+.cmp-table td:first-child, .cmp-table th:first-child { text-align: left; font-weight: 700; }
+.up { color: #10b981; font-weight: 700; } .dn { color: #ef4444; font-weight: 700; }
+
+/* 空 */
+.empty { text-align: center; padding: 48px 16px; color: var(--muted); }
+.empty-big { font-size: 52px; margin-bottom: 14px; }
+.empty-text { font-size: 13px; line-height: 1.9; }
+
+/* 設定モーダル */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 400; align-items: flex-end; }
+.modal.open { display: flex; }
+.modal-box {
+  background: var(--white); border-radius: 24px 24px 0 0;
+  padding: 20px 20px 36px; width: 100%; max-height: 85vh; overflow-y: auto;
+  animation: slideUp2 0.3s ease;
 }
-.month-tab.active { background: linear-gradient(135deg, var(--pink), var(--orange)); color: #fff; border-color: transparent; }
+@keyframes slideUp2 { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-title { font-size: 17px; font-weight: 900; margin-bottom: 16px; }
+.modal-field { margin-bottom: 12px; }
+.modal-label { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 6px; display: block; }
+.modal-input {
+  width: 100%; border: 2px solid var(--border); border-radius: 12px;
+  padding: 10px 12px; font-size: 15px; font-family: 'Noto Sans JP', sans-serif;
+  outline: none; color: var(--text); background: var(--bg);
+}
+.modal-input:focus { border-color: var(--pink); }
+.modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+.modal-cancel { flex: 1; padding: 11px; background: var(--surface); border: none; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+.modal-ok { flex: 2; padding: 11px; background: linear-gradient(135deg, var(--pink), var(--orange)); border: none; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+.modal-danger { margin-top: 12px; width: 100%; padding: 11px; background: none; border: 1.5px solid #fca5a5; border-radius: 12px; color: #ef4444; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+
+/* チャートラップ */
+.chart-wrap { height: 190px; position: relative; }
+
+/* フッタークレジット */
+.credit { text-align: center; padding: 16px; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
 </style>
 </head>
 <body>
 
-<!-- ヘッダー -->
-<header>
-  <div class="header-left">
-    <div>
-      <div class="header-logo">💅 iu. AIコーチ</div>
-      <div class="header-sub">いくほさん専用・経営サポート</div>
-    </div>
-  </div>
-  <div class="goal-chip" onclick="openGoalModal()">🎯 目標設定</div>
-</header>
+<!-- ===== セットアップ ===== -->
+<div id="setup-screen">
+  <div class="setup-logo">OBENTOUeye</div>
+  <div class="setup-title">💅 AI経営コーチ</div>
+  <div class="setup-sub">一人サロン専用・スクショ送るだけで<br>売上管理＋経営アドバイスが届く</div>
 
-<!-- 目標バー -->
-<div id="goal-bar-section">
-  <div class="goal-label">今月 <span id="goal-month-label">—</span></div>
-  <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
-  <div class="goal-pct-text" id="goal-pct-text">-%</div>
+  <div class="setup-card">
+    <div class="setup-section-title">サロン情報</div>
+    <div class="setup-field">
+      <label class="setup-label">サロン名</label>
+      <input type="text" class="setup-input" id="s-salon" placeholder="例：iu.（イユドット）">
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">あなたの名前</label>
+      <input type="text" class="setup-input" id="s-owner" placeholder="例：いくほ">
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">月商目標（円）</label>
+      <input type="number" class="setup-input" id="s-goal" placeholder="1500000" inputmode="numeric">
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">主なメニュー（カンマ区切り）</label>
+      <input type="text" class="setup-input" id="s-menus" placeholder="例：アゲエク, ラッシュリフト, エクステ">
+    </div>
+
+    <div class="setup-section-title">AI設定</div>
+    <div class="setup-field">
+      <label class="setup-label">Anthropic APIキー</label>
+      <input type="password" class="setup-input" id="s-api" placeholder="sk-ant-...">
+      <div class="setup-hint">
+        <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> で取得できます。<br>
+        キーはこの端末にのみ保存され、外部に送信されません。
+      </div>
+    </div>
+
+    <button class="setup-btn" onclick="startApp()">🚀 はじめる</button>
+  </div>
+
+  <div class="setup-credit">Produced by OBENTOUeye</div>
 </div>
 
-<!-- メイン -->
-<main>
+<!-- ===== メイン ===== -->
+<div id="main-screen">
 
-  <!-- 月サマリー -->
-  <div id="monthly-summary">
-    <div class="summary-title">📊 今月の累計</div>
-    <div class="summary-grid">
-      <div class="summary-item">
-        <div class="summary-val" id="sum-revenue">¥0</div>
-        <div class="summary-key">売上合計</div>
+  <!-- ヘッダー -->
+  <div class="app-header">
+    <div class="app-header-left">
+      <div class="salon-icon">💅</div>
+      <div>
+        <div class="salon-name" id="h-salon">サロン名</div>
+        <div class="salon-owner" id="h-owner">オーナー</div>
       </div>
-      <div class="summary-item">
-        <div class="summary-val" id="sum-clients">0人</div>
-        <div class="summary-key">来客数</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-val" id="sum-count">0回</div>
-        <div class="summary-key">記録数</div>
-      </div>
+    </div>
+    <div class="header-settings" onclick="openSettings()">⚙️</div>
+  </div>
+
+  <!-- 目標バー -->
+  <div class="goal-strip">
+    <div class="goal-strip-label" id="g-label">今月の目標</div>
+    <div class="goal-strip-track"><div class="goal-strip-fill" id="g-fill" style="width:0%"></div></div>
+    <div class="goal-strip-pct" id="g-pct">0%</div>
+  </div>
+
+  <!-- ナビ -->
+  <div class="nav">
+    <div class="nav-item active" onclick="switchPage('home', this)">🏠 ホーム</div>
+    <div class="nav-item" onclick="switchPage('month', this)">📊 今月</div>
+    <div class="nav-item" onclick="switchPage('history', this)">📅 履歴</div>
+    <div class="nav-item" onclick="switchPage('yearly', this)">📈 年間</div>
+  </div>
+
+  <!-- ホーム -->
+  <div class="page active" id="page-home">
+    <div id="chat-list" class="chat-list"></div>
+    <div id="home-empty" class="empty">
+      <div class="empty-big">📸</div>
+      <div class="empty-text">カルテカンのスクショを貼って<br>送るだけ！<br><br>AIが読み取って売上・メニューを整理して<br>経営アドバイスをくれるよ💕</div>
     </div>
   </div>
 
-  <!-- 月タブ -->
-  <div id="month-tabs"></div>
+  <!-- 今月 -->
+  <div class="page" id="page-month">
+    <div class="kpi-grid">
+      <div class="kpi full">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">今月の売上合計</div>
+        <div class="kpi-val big" id="m-rev">¥0</div>
+        <div class="kpi-desc" id="m-rev-desc">目標まであと ¥—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-label">来客数</div>
+        <div class="kpi-val" id="m-cli">0人</div>
+        <div class="kpi-desc" id="m-days">0回記録</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">💵</div>
+        <div class="kpi-label">客単価</div>
+        <div class="kpi-val" id="m-avg">¥0</div>
+        <div class="kpi-desc">ひとり平均</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🌱</div>
+        <div class="kpi-label">新規</div>
+        <div class="kpi-val" id="m-new">0人</div>
+        <div class="kpi-desc" id="m-new-r">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">💖</div>
+        <div class="kpi-label">リピーター</div>
+        <div class="kpi-val" id="m-rep">0人</div>
+        <div class="kpi-desc" id="m-rep-r">リピート率 —</div>
+      </div>
+    </div>
 
-  <!-- 空状態 -->
-  <div id="empty-state">
-    <div class="big">📸</div>
-    <p>カルテカンのスクショを貼って<br>「分析して！」って送るだけ💕<br><br>売上・メニュー・来客数…<br>なんでもOK！AIが読んで<br>コーチしてくれるよ🤖</p>
+    <div class="card">
+      <div class="card-title">🏆 今月のメニュー</div>
+      <div id="month-menu-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 今月のポイント</div>
+      <div id="month-tips" style="font-size:13px; line-height:1.9; color:#555;"></div>
+    </div>
   </div>
 
   <!-- 履歴 -->
-  <div id="history-list"></div>
-
-</main>
-
-<!-- 入力エリア -->
-<div id="input-area">
-  <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-    <img id="preview-img" alt="preview">
-    <div id="drop-zone-text">📸 <strong>スクショをここにペースト or タップして選択</strong></div>
-    <input type="file" id="file-input" accept="image/*">
+  <div class="page" id="page-history">
+    <div class="month-chips" id="hist-chips"></div>
+    <div id="hist-list"></div>
   </div>
-  <div class="input-row">
-    <textarea id="memo-input" placeholder="一言メモ（今日の様子・気になること）" rows="1"></textarea>
-    <button id="send-btn" onclick="submit()" title="送信">🚀</button>
+
+  <!-- 年間 -->
+  <div class="page" id="page-yearly">
+    <div class="card">
+      <div class="card-title">📈 月別売上推移</div>
+      <div class="chart-wrap"><canvas id="chart-year"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 月次比較</div>
+      <div style="overflow-x:auto;">
+        <table class="cmp-table" id="cmp-table">
+          <thead><tr><th>月</th><th>売上</th><th>来客</th><th>単価</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 年間メニューランキング</div>
+      <div id="yearly-menu"></div>
+    </div>
   </div>
+
+  <!-- 送信エリア -->
+  <div class="send-area" id="send-area">
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('img-input').click()">
+      <img id="preview-thumb" alt="">
+      <div class="drop-zone-label" id="drop-label">📸 <strong>スクショをここにペースト or タップ</strong></div>
+      <span class="drop-zone-clear" id="drop-clear" onclick="clearImg(event)">✕</span>
+    </div>
+    <input type="file" id="img-input" accept="image/*">
+    <div class="send-row">
+      <textarea class="memo-box" id="memo-box" placeholder="一言メモ（任意）" rows="1"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendRecord()">🚀</button>
+    </div>
+  </div>
+
+  <div class="credit">Produced by OBENTOUeye</div>
 </div>
 
-<!-- 目標設定モーダル -->
-<div id="goal-modal">
+<!-- 設定モーダル -->
+<div class="modal" id="settings-modal">
   <div class="modal-box">
-    <div class="modal-title">🎯 月商目標を設定</div>
-    <div class="modal-label">目標金額（円）</div>
-    <input type="number" class="modal-input" id="modal-goal-input" placeholder="1500000">
-    <div class="modal-label">今月の売上（わかれば入力）</div>
-    <input type="number" class="modal-input" id="modal-revenue-input" placeholder="0">
-    <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeGoalModal()">キャンセル</button>
-      <button class="modal-ok" onclick="saveGoal()">保存する</button>
+    <div class="modal-title">⚙️ 設定</div>
+    <div class="modal-field">
+      <label class="modal-label">サロン名</label>
+      <input type="text" class="modal-input" id="cfg-salon">
     </div>
+    <div class="modal-field">
+      <label class="modal-label">オーナー名</label>
+      <input type="text" class="modal-input" id="cfg-owner">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">月商目標（円）</label>
+      <input type="number" class="modal-input" id="cfg-goal" inputmode="numeric">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">主なメニュー</label>
+      <input type="text" class="modal-input" id="cfg-menus">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">APIキー</label>
+      <input type="password" class="modal-input" id="cfg-api">
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeSettings()">閉じる</button>
+      <button class="modal-ok" onclick="saveSettings()">保存</button>
+    </div>
+    <button class="modal-danger" onclick="resetApp()">🗑️ データをリセット</button>
   </div>
 </div>
 
 <script>
-// ====== データ管理 ======
-const STORAGE_KEY = 'iu_coach_v2';
+const SK = 'obentou_coach_v1';
+let cfg = {}, records = [], selImg = null, histMonth = null;
+let chartYear;
 
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { goal: 1500000, revenue: 0, records: [] }; }
-  catch { return { goal: 1500000, revenue: 0, records: [] }; }
+// ===== 初期化 =====
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(SK));
+    if (d) { cfg = d.cfg || {}; records = d.records || []; }
+  } catch {}
 }
-function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function persist() { localStorage.setItem(SK, JSON.stringify({ cfg, records })); }
 
-let appData = loadData();
-let currentMonth = getCurrentMonth();
-let selectedImage = null;
-
-function getCurrentMonth() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-}
-function formatMonth(ym) {
-  const [y, m] = ym.split('-');
-  return `${y}年${parseInt(m)}月`;
-}
-function formatDate(iso) {
-  const d = new Date(iso);
-  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-}
-
-// ====== 目標バー ======
-function updateGoalBar() {
-  const pct = Math.min(100, Math.round(appData.revenue / appData.goal * 100));
-  document.getElementById('goal-fill').style.width = pct + '%';
-  document.getElementById('goal-pct-text').textContent = pct + '%';
-  document.getElementById('goal-month-label').textContent = formatMonth(currentMonth);
+function startApp() {
+  const salon = document.getElementById('s-salon').value.trim();
+  const owner = document.getElementById('s-owner').value.trim();
+  const goal = parseInt(document.getElementById('s-goal').value) || 1500000;
+  const menus = document.getElementById('s-menus').value.trim();
+  const api = document.getElementById('s-api').value.trim();
+  if (!salon || !owner) { alert('サロン名とお名前を入れてね！'); return; }
+  if (!api) { alert('APIキーを入れてね！'); return; }
+  cfg = { salon, owner, goal, menus, api };
+  persist();
+  bootMain();
 }
 
-// ====== 月タブ ======
-function getMonths() {
-  const months = [...new Set(appData.records.map(r => r.month))];
-  if (!months.includes(currentMonth)) months.unshift(currentMonth);
-  return months.sort().reverse();
-}
-function renderMonthTabs() {
-  const months = getMonths();
-  const tabs = document.getElementById('month-tabs');
-  tabs.innerHTML = months.map(m => `
-    <div class="month-tab ${m === currentMonth ? 'active' : ''}" onclick="selectMonth('${m}')">
-      ${formatMonth(m)}
-    </div>`).join('');
-}
-function selectMonth(m) {
-  currentMonth = m;
-  renderMonthTabs();
-  renderHistory();
-  updateGoalBar();
+function bootMain() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+  document.getElementById('h-salon').textContent = cfg.salon;
+  document.getElementById('h-owner').textContent = cfg.owner + ' さん';
+  updateGoalStrip();
+  renderHome();
 }
 
-// ====== サマリー ======
-function updateSummary() {
-  const records = appData.records.filter(r => r.month === currentMonth && r.parsed);
-  if (records.length === 0) {
-    document.getElementById('monthly-summary').style.display = 'none';
-    return;
-  }
-  document.getElementById('monthly-summary').style.display = 'block';
-  const totalRevenue = records.reduce((s, r) => s + (r.parsed.revenue || 0), 0);
-  const totalClients = records.reduce((s, r) => s + (r.parsed.clients || 0), 0);
-  document.getElementById('sum-revenue').textContent = totalRevenue > 0 ? '¥' + totalRevenue.toLocaleString() : '—';
-  document.getElementById('sum-clients').textContent = totalClients > 0 ? totalClients + '人' : '—';
-  document.getElementById('sum-count').textContent = records.length + '回';
-  if (totalRevenue > 0) appData.revenue = totalRevenue;
-  updateGoalBar();
+// ===== ユーティリティ =====
+const getMonth = d => d.slice(0, 7);
+const fmtMonth = ym => { const [y,m] = ym.split('-'); return `${y}年${parseInt(m)}月`; };
+const nowMonth = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+const fmtDate = iso => { const d = new Date(iso); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+
+// ===== ナビ =====
+function switchPage(name, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('send-area').style.display = name === 'home' ? 'block' : 'none';
+  if (name === 'month') renderMonth();
+  if (name === 'history') renderHistory();
+  if (name === 'yearly') renderYearly();
 }
 
-// ====== 履歴レンダリング ======
-function renderHistory() {
-  const records = appData.records.filter(r => r.month === currentMonth).slice().reverse();
-  const list = document.getElementById('history-list');
-  const empty = document.getElementById('empty-state');
-
-  if (records.length === 0) {
-    empty.style.display = 'block';
-    list.innerHTML = '';
-    return;
-  }
-  empty.style.display = 'none';
-  list.innerHTML = records.map(r => `
-    <div class="history-card" id="card-${r.id}">
-      <div class="history-card-header">
-        <span class="history-card-date">📅 ${formatDate(r.date)}</span>
-        <button class="history-card-del" onclick="deleteRecord('${r.id}')">✕</button>
-      </div>
-      ${r.imageData ? `<img class="history-screenshot" src="${r.imageData}" alt="スクショ">` : ''}
-      ${r.memo ? `<div class="history-memo">「${r.memo}」</div>` : ''}
-      <div class="ai-result" id="result-${r.id}">
-        ${r.result ? renderResultHTML(r.result) : `<div class="ai-result-loading"><div class="dots"><span></span><span></span><span></span></div><div style="margin-top:8px">分析中…</div></div>`}
-      </div>
-    </div>`).join('');
-
-  updateSummary();
+// ===== 目標バー =====
+function updateGoalStrip() {
+  const cm = nowMonth();
+  const rev = records.filter(r => getMonth(r.date) === cm).reduce((s, r) => s + (r.revenue || 0), 0);
+  const pct = Math.min(100, Math.round(rev / cfg.goal * 100));
+  document.getElementById('g-label').textContent = fmtMonth(cm) + ' 目標';
+  document.getElementById('g-fill').style.width = pct + '%';
+  document.getElementById('g-pct').textContent = pct + '%';
 }
 
-function renderResultHTML(result) {
-  if (result.error) return `<div style="color:#ccc;font-size:13px;text-align:center;padding:8px">うまく読み取れんかった😢<br>もう一度スクショを送ってみてね</div>`;
+// ===== 画像 =====
+document.getElementById('img-input').addEventListener('change', e => { if (e.target.files[0]) loadImg(e.target.files[0]); });
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); if (e.dataTransfer.files[0]) loadImg(e.dataTransfer.files[0]); });
+document.addEventListener('paste', e => { const items = e.clipboardData?.items; if (!items) return; for (const it of items) { if (it.type.startsWith('image/')) { loadImg(it.getAsFile()); break; } } });
 
-  return `
-    <div class="result-block numbers">
-      <div class="result-block-title">💰 読み取った数字</div>
-      <div class="result-block-text">${result.numbers}</div>
-    </div>
-    <div class="result-block coach">
-      <div class="result-block-title">🤖 コーチからのひと言</div>
-      <div class="result-block-text">${result.coach}</div>
-    </div>
-    <div class="result-block action">
-      <div class="result-block-title">📋 今すぐやること</div>
-      <div>
-        ${(result.actions||[]).map((a,i) => `
-          <div class="action-item">
-            <div class="action-num">${i+1}</div>
-            <div>${a}</div>
-          </div>`).join('')}
-      </div>
-    </div>`;
+function loadImg(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    selImg = e.target.result;
+    const thumb = document.getElementById('preview-thumb');
+    thumb.src = selImg; thumb.style.display = 'block';
+    document.getElementById('drop-label').style.display = 'none';
+    document.getElementById('drop-clear').style.display = 'block';
+    dz.classList.add('has-img');
+  };
+  reader.readAsDataURL(file);
+}
+function clearImg(e) {
+  e.stopPropagation(); selImg = null;
+  document.getElementById('preview-thumb').style.display = 'none';
+  document.getElementById('drop-label').style.display = 'block';
+  document.getElementById('drop-clear').style.display = 'none';
+  dz.classList.remove('has-img');
+  document.getElementById('img-input').value = '';
 }
 
-// ====== 送信 ======
-async function submit() {
-  const memo = document.getElementById('memo-input').value.trim();
-  if (!selectedImage && !memo) {
-    alert('スクショか一言メモを入れてね！');
-    return;
-  }
+// テキストエリア自動伸縮
+document.getElementById('memo-box').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 90) + 'px';
+});
 
+// ===== 送信 =====
+async function sendRecord() {
+  const memo = document.getElementById('memo-box').value.trim();
+  if (!selImg && !memo) { alert('スクショか一言メモを入れてね！'); return; }
   const btn = document.getElementById('send-btn');
   btn.disabled = true;
 
-  const record = {
+  const rec = {
     id: Date.now().toString(),
-    month: currentMonth,
     date: new Date().toISOString(),
-    imageData: selectedImage || null,
+    month: nowMonth(),
+    img: selImg || null,
     memo: memo || null,
-    result: null,
-    parsed: null
+    result: null
   };
-
-  appData.records.push(record);
-  saveData(appData);
+  records.push(rec);
+  persist();
 
   // リセット
-  selectedImage = null;
-  document.getElementById('preview-img').style.display = 'none';
-  document.getElementById('drop-zone-text').style.display = 'block';
-  document.getElementById('drop-zone').classList.remove('has-image');
-  document.getElementById('memo-input').value = '';
+  clearImg({ stopPropagation: () => {} });
+  document.getElementById('memo-box').value = '';
 
-  renderMonthTabs();
-  renderHistory();
+  renderHome();
+  updateGoalStrip();
 
   // AI分析
   try {
-    const result = await runAI(record);
-    const idx = appData.records.findIndex(r => r.id === record.id);
-    if (idx !== -1) {
-      appData.records[idx].result = result;
-      appData.records[idx].parsed = result.parsed || null;
-      saveData(appData);
-    }
-    const el = document.getElementById(`result-${record.id}`);
-    if (el) el.innerHTML = renderResultHTML(result);
-    updateSummary();
-  } catch(e) {
-    const idx = appData.records.findIndex(r => r.id === record.id);
-    if (idx !== -1) { appData.records[idx].result = { error: true }; saveData(appData); }
-    const el = document.getElementById(`result-${record.id}`);
-    if (el) el.innerHTML = `<div style="color:#ccc;font-size:13px;text-align:center;padding:8px">AI分析に失敗しました😢</div>`;
+    const res = await callAI(rec);
+    const idx = records.findIndex(r => r.id === rec.id);
+    if (idx !== -1) { records[idx].result = res; persist(); }
+    const el = document.getElementById(`result-${rec.id}`);
+    if (el) el.innerHTML = resultHTML(res);
+    updateGoalStrip();
+    renderMonth();
+  } catch (e) {
+    const idx = records.findIndex(r => r.id === rec.id);
+    if (idx !== -1) { records[idx].result = { error: true }; persist(); }
+    const el = document.getElementById(`result-${rec.id}`);
+    if (el) el.innerHTML = `<div style="color:#ccc;font-size:12px;text-align:center;padding:10px;">読み取りに失敗しました😢<br>もう一度送ってみてね</div>`;
   }
-
   btn.disabled = false;
 }
 
-// ====== AI分析 ======
-async function runAI(record) {
-  const today = new Date();
-  const month = today.getMonth() + 1;
-  const season = month >= 3 && month <= 5 ? '春' : month >= 6 && month <= 8 ? '夏' : month >= 9 && month <= 11 ? '秋' : '冬';
+// ===== AI呼び出し =====
+async function callAI(rec) {
+  const cm = nowMonth();
+  const monthRecs = records.filter(r => r.month === cm && r.result && !r.result.error);
+  const totalRev = monthRecs.reduce((s, r) => s + (r.result?.revenue || 0), 0);
+  const remaining = cfg.goal - totalRev;
+  const mn = new Date().getMonth() + 1;
+  const season = mn >= 3 && mn <= 5 ? '春' : mn >= 6 && mn <= 8 ? '夏' : mn >= 9 && mn <= 11 ? '秋' : '冬';
+  const seasonTips = {
+    '春': 'UV・花粉・乾燥でまつげダメージ大。UVケア・保湿系の店販提案が刺さりやすい。',
+    '夏': '汗・皮脂でモチが落ちやすい。コーティング剤・沁みブロックを推す季節。',
+    '秋': '夏ダメージのリカバリー期。保湿・栄養補給系ケアを提案しやすい。',
+    '冬': '乾燥がピーク。温浴ケア・保湿商品と相性◯。年末年始に向けて単価UPの好機。'
+  };
 
-  // 過去の累積データ
-  const pastRecords = appData.records.filter(r => r.month === record.month && r.parsed);
-  const totalRevSoFar = pastRecords.reduce((s, r) => s + (r.parsed.revenue || 0), 0);
-  const remaining = appData.goal - totalRevSoFar;
+  const prompt = `あなたは一人サロン専門のAI経営コーチです。
+サロン名：${cfg.salon}
+オーナー：${cfg.owner}さん
+月商目標：¥${cfg.goal.toLocaleString()}
+今月の累計売上（このデータ除く）：¥${totalRev.toLocaleString()}
+目標まで残り：¥${remaining.toLocaleString()}
+主なメニュー：${cfg.menus || 'まつげ系全般'}
+今の季節：${season}
+季節のポイント：${seasonTips[season]}
+メモ：${rec.memo || 'なし'}
+${rec.img ? '※スクショ画像あり' : '※画像なし'}
 
-  const prompt = `あなたは美容サロン「iu.」（京都・アイリスト・個人サロン）のオーナー・いくほさんの専属AIコーチです。経理もコーチングも両方やります。
-
-【いくほさんのサロン情報】
-- 主力メニュー：アゲエク（ラッシュリフト＋エクステ）、通常エクステ、ラッシュリフト単体
-- 自社商品：ぬくみずホルダー、KYO-KURAグルー、Shiki Bonder、沁みブロックパック
-- 月商目標：¥${appData.goal.toLocaleString()}
-- 今月の累計売上（このデータ以前）：¥${totalRevSoFar.toLocaleString()}
-- 目標まで残り：¥${remaining.toLocaleString()}
-- 現在の季節：${season}（${month}月）
-
-【送られてきた情報】
-メモ：${record.memo || 'なし'}
-${record.imageData ? '※スクショ画像あり（添付）' : '※画像なし'}
-
-以下を必ずやってください：
-1. 画像から数字（売上・来客数・メニュー名・人数など）を読み取る
-2. 今の季節（${season}）に合わせた提案をする
-3. 目標達成のための具体的アドバイスをする
-4. わかりやすい言葉で、友達みたいに話しかける感じで
-
-JSONのみ返してください：
+スクショ画像から以下を読み取り、JSONのみ返してください（余分なテキスト不要）：
 {
-  "numbers": "読み取った数字や情報（売上・来客・メニューなど、わかりやすく）",
-  "coach": "コーチからのひと言（目標の進捗＋季節に合わせた商品・メニュー提案＋まつげアドバイス）",
-  "actions": ["今すぐやること1", "今すぐやること2", "今すぐやること3"],
-  "parsed": {"revenue": 数字か0, "clients": 数字か0}
+  "revenue": 売上合計の数字（なければ0）,
+  "new_clients": 新規人数（なければ0）,
+  "repeat_clients": 固定・リピーター人数（なければ0）,
+  "menus": ["読み取ったメニュー名の配列"],
+  "nums_text": "読み取った数字を${cfg.owner}さんへのフレンドリーな説明（2〜3文・絵文字あり）",
+  "coach_text": "目標進捗＋季節アドバイス＋具体的な商品・声かけ提案（3〜4文・友達口調・絵文字あり）",
+  "actions": ["すぐできること1", "すぐできること2", "すぐできること3"]
 }`;
 
-  const messages = [{ role: 'user', content: [] }];
-
-  if (record.imageData) {
-    const base64 = record.imageData.split(',')[1];
-    const mediaType = record.imageData.split(';')[0].split(':')[1];
-    messages[0].content.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } });
+  const content = [];
+  if (rec.img) {
+    const base64 = rec.img.split(',')[1];
+    const mime = rec.img.split(';')[0].split(':')[1];
+    content.push({ type: 'image', source: { type: 'base64', media_type: mime, data: base64 } });
   }
-  messages[0].content.push({ type: 'text', text: prompt });
+  content.push({ type: 'text', text: prompt });
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages })
+    headers: { 'Content-Type': 'application/json', 'x-api-key': cfg.api, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content }] })
   });
-
   const data = await res.json();
   const text = data.content[0].text.replace(/```json|```/g, '').trim();
   return JSON.parse(text);
 }
 
-// ====== 削除 ======
-function deleteRecord(id) {
+// ===== 結果HTML =====
+function resultHTML(r) {
+  if (r.error) return `<div style="color:#ccc;font-size:12px;text-align:center;padding:10px;">読み取りに失敗しました😢</div>`;
+  return `<div class="ai-wrap">
+    <div class="ai-block nums">
+      <div class="ai-block-title">📊 今日の数字</div>
+      <div class="ai-block-text">${r.nums_text}</div>
+    </div>
+    <div class="ai-block coach">
+      <div class="ai-block-title">🤖 コーチより</div>
+      <div class="ai-block-text">${r.coach_text}</div>
+    </div>
+    <div class="ai-block acts">
+      <div class="ai-block-title">✅ 今すぐやること</div>
+      ${(r.actions||[]).map((a,i) => `<div class="act-item"><div class="act-num">${i+1}</div><div>${a}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ===== ホーム =====
+function renderHome() {
+  const list = document.getElementById('chat-list');
+  const empty = document.getElementById('home-empty');
+  const cm = nowMonth();
+  const recs = records.filter(r => r.month === cm).slice().reverse();
+  if (recs.length === 0) { empty.style.display = 'block'; list.innerHTML = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = recs.map(r => `
+    <div class="chat-card" id="card-${r.id}">
+      <div class="chat-card-head">
+        <span class="chat-card-date">📅 ${fmtDate(r.date)}</span>
+        <button class="chat-del" onclick="delRec('${r.id}')">✕</button>
+      </div>
+      ${r.img ? `<img class="chat-img" src="${r.img}" alt="">` : ''}
+      ${r.memo ? `<div class="chat-memo">「${r.memo}」</div>` : ''}
+      <div id="result-${r.id}">
+        ${r.result ? resultHTML(r.result) : `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div><div style="margin-top:8px">分析中…</div></div>`}
+      </div>
+    </div>`).join('');
+}
+
+function delRec(id) {
   if (!confirm('この記録を削除する？')) return;
-  appData.records = appData.records.filter(r => r.id !== id);
-  saveData(appData);
-  renderMonthTabs();
-  renderHistory();
-  updateSummary();
+  records = records.filter(r => r.id !== id);
+  persist(); renderHome(); updateGoalStrip();
 }
 
-// ====== 目標モーダル ======
-function openGoalModal() {
-  document.getElementById('modal-goal-input').value = appData.goal;
-  document.getElementById('modal-revenue-input').value = appData.revenue || '';
-  document.getElementById('goal-modal').classList.add('open');
-}
-function closeGoalModal() { document.getElementById('goal-modal').classList.remove('open'); }
-function saveGoal() {
-  const g = parseInt(document.getElementById('modal-goal-input').value);
-  const r = parseInt(document.getElementById('modal-revenue-input').value) || 0;
-  if (g) { appData.goal = g; appData.revenue = r; saveData(appData); updateGoalBar(); }
-  closeGoalModal();
-}
+// ===== 今月 =====
+function renderMonth() {
+  const cm = nowMonth();
+  const recs = records.filter(r => r.month === cm && r.result && !r.result.error);
+  const rev = recs.reduce((s,r) => s + (r.result.revenue||0), 0);
+  const nc = recs.reduce((s,r) => s + (r.result.new_clients||0), 0);
+  const rc = recs.reduce((s,r) => s + (r.result.repeat_clients||0), 0);
+  const tc = nc + rc;
+  const avg = tc > 0 ? Math.round(rev/tc) : 0;
+  const rem = cfg.goal - rev;
 
-// ====== 画像選択 ======
-document.getElementById('file-input').addEventListener('change', e => {
-  if (e.target.files[0]) loadImage(e.target.files[0]);
-});
+  document.getElementById('m-rev').textContent = '¥' + rev.toLocaleString();
+  document.getElementById('m-rev-desc').textContent = rem > 0 ? `あと ¥${rem.toLocaleString()} で達成！` : '🎉 目標達成！';
+  document.getElementById('m-cli').textContent = tc + '人';
+  document.getElementById('m-days').textContent = recs.length + '回記録';
+  document.getElementById('m-avg').textContent = '¥' + avg.toLocaleString();
+  document.getElementById('m-new').textContent = nc + '人';
+  document.getElementById('m-new-r').textContent = tc > 0 ? `全体の${Math.round(nc/tc*100)}%` : '—';
+  document.getElementById('m-rep').textContent = rc + '人';
+  document.getElementById('m-rep-r').textContent = tc > 0 ? `リピート率 ${Math.round(rc/tc*100)}%` : '—';
 
-const dz = document.getElementById('drop-zone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-dz.addEventListener('drop', e => {
-  e.preventDefault(); dz.classList.remove('drag-over');
-  if (e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]);
-});
+  // メニュー
+  const mc = {};
+  recs.forEach(r => (r.result.menus||[]).forEach(m => { mc[m] = (mc[m]||0)+1; }));
+  const ranking = Object.entries(mc).sort((a,b) => b[1]-a[1]);
+  document.getElementById('month-menu-list').innerHTML = ranking.length === 0
+    ? '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px;">スクショを送るとメニューが自動で集計されるよ</div>'
+    : ranking.slice(0,10).map(([m,c],i) => `<div class="menu-item"><div class="menu-rank ${i<3?'top':'mid'}">${i+1}</div><div class="menu-name">${m}</div><div class="menu-cnt">${c}回</div></div>`).join('');
 
-// ペースト対応
-document.addEventListener('paste', e => {
-  const items = e.clipboardData?.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith('image/')) { loadImage(item.getAsFile()); break; }
-  }
-});
-
-function loadImage(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    selectedImage = e.target.result;
-    const img = document.getElementById('preview-img');
-    img.src = selectedImage;
-    img.style.display = 'block';
-    document.getElementById('drop-zone-text').style.display = 'none';
-    dz.classList.add('has-image');
+  // ポイント
+  const mn = new Date().getMonth()+1;
+  const season = mn>=3&&mn<=5?'春':mn>=6&&mn<=8?'夏':mn>=9&&mn<=11?'秋':'冬';
+  const tips = {
+    '春': '🌸 <b>春のケアポイント</b><br>紫外線・花粉・乾燥でまつげがダメージを受けやすい時期。カウンセリングで「今の季節、まつげが乾燥しやすいんです」と一言添えて、保湿系・UVケア商品を自然に提案してみよう！',
+    '夏': '☀️ <b>夏のケアポイント</b><br>汗・皮脂でモチが落ちやすく、お客さんが気にしやすい時期。施術後のコーティング剤提案や、沁みブロックのワンランクアップ提案が刺さりやすい！',
+    '秋': '🍂 <b>秋のケアポイント</b><br>夏のダメージリカバリー期。「夏に紫外線受けてるから保湿大事ですよ」の一言でケア商品が動きやすい。年末に向けてリピート促進の仕込みを始めよう！',
+    '冬': '❄️ <b>冬のケアポイント</b><br>乾燥がピークで保湿系商品が売れやすい季節。年末年始のスペシャルケアメニューの提案や、次回予約率UPのチャンス！'
   };
-  reader.readAsDataURL(file);
+  const pct = Math.round(rev/cfg.goal*100);
+  const paceMsg = pct >= 80 ? `✅ 目標の${pct}%達成！この調子でいこう🔥` : pct >= 50 ? `📊 目標の${pct}%。ラストスパートのタイミングや💪` : `🌱 まだ${pct}%。記録を増やして流れを作っていこう！`;
+  document.getElementById('month-tips').innerHTML = `<div style="margin-bottom:12px;">${paceMsg}</div><div>${tips[season]}</div>`;
 }
 
-// ====== テキストエリア自動リサイズ ======
-const ta = document.getElementById('memo-input');
-ta.addEventListener('input', () => {
-  ta.style.height = 'auto';
-  ta.style.height = Math.min(ta.scrollHeight, 80) + 'px';
-});
+// ===== 履歴 =====
+function renderHistory() {
+  const months = [...new Set(records.map(r => r.month))].sort().reverse();
+  if (months.length === 0) { document.getElementById('hist-chips').innerHTML = ''; document.getElementById('hist-list').innerHTML = `<div class="empty"><div class="empty-big">📅</div><div class="empty-text">まだ記録がないよ</div></div>`; return; }
+  if (!histMonth || !months.includes(histMonth)) histMonth = months[0];
+  document.getElementById('hist-chips').innerHTML = months.map(m => `<div class="month-chip ${m===histMonth?'active':''}" onclick="selectHistMonth('${m}')">${fmtMonth(m)}</div>`).join('');
+  const recs = records.filter(r => r.month === histMonth).slice().reverse();
+  document.getElementById('hist-list').innerHTML = recs.map(r => {
+    const d = new Date(r.date);
+    const mm = d.getMonth()+1, dd = d.getDate();
+    const rev = r.result?.revenue || 0;
+    const menus = r.result?.menus || [];
+    return `<div class="chat-card" style="margin-bottom:10px;">
+      <div class="chat-card-head">
+        <span class="chat-card-date">📅 ${mm}/${dd} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span>
+        <button class="chat-del" onclick="delRec('${r.id}')">✕</button>
+      </div>
+      ${r.img ? `<img class="chat-img" src="${r.img}" alt="" style="max-height:120px;">` : ''}
+      <div style="padding:10px 14px; font-size:13px; color:#555; line-height:1.8;">
+        ${rev > 0 ? `<b>¥${rev.toLocaleString()}</b>　` : ''}${menus.length > 0 ? menus.join('・') : ''}
+        ${r.memo ? `<div style="margin-top:4px; font-style:italic; color:var(--muted);">「${r.memo}」</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
 
-// ====== 初期化 ======
-updateGoalBar();
-renderMonthTabs();
-renderHistory();
+function selectHistMonth(m) { histMonth = m; renderHistory(); }
+
+// ===== 年間 =====
+function renderYearly() {
+  const months = [...new Set(records.map(r => r.month))].sort();
+  const mData = months.map(m => {
+    const rs = records.filter(r => r.month === m && r.result && !r.result.error);
+    const rev = rs.reduce((s,r) => s + (r.result.revenue||0), 0);
+    const nc = rs.reduce((s,r) => s + (r.result.new_clients||0), 0);
+    const rc = rs.reduce((s,r) => s + (r.result.repeat_clients||0), 0);
+    const tc = nc+rc;
+    return { month: m, revenue: rev, clients: tc, avg: tc>0?Math.round(rev/tc):0 };
+  });
+
+  if (chartYear) chartYear.destroy();
+  chartYear = new Chart(document.getElementById('chart-year'), {
+    type: 'line',
+    data: {
+      labels: mData.map(d => fmtMonth(d.month)),
+      datasets: [{
+        data: mData.map(d => d.revenue),
+        borderColor: '#ff8fab', backgroundColor: 'rgba(255,143,171,0.15)',
+        fill: true, tension: 0.3, pointBackgroundColor: '#ff8fab', pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '¥'+c.parsed.y.toLocaleString() } } },
+      scales: {
+        x: { ticks: { color: '#aaa', font: { size: 10 } }, grid: { display: false } },
+        y: { ticks: { color: '#aaa', font: { size: 10 }, callback: v => v>=10000?(v/10000).toFixed(0)+'万':v }, grid: { color: '#f5f5f5' } }
+      }
+    }
+  });
+
+  const tbody = document.getElementById('cmp-table').querySelector('tbody');
+  tbody.innerHTML = mData.slice().reverse().map((d,i,arr) => {
+    const prev = arr[i+1];
+    const diff = prev ? d.revenue - prev.revenue : 0;
+    const cls = diff>0?'up':diff<0?'dn':'';
+    const sym = diff>0?'↑':diff<0?'↓':'—';
+    return `<tr><td>${fmtMonth(d.month)}</td><td>¥${d.revenue.toLocaleString()}<br><span class="${cls}" style="font-size:10px;">${prev?sym+' ¥'+Math.abs(diff).toLocaleString():'—'}</span></td><td>${d.clients}人</td><td>¥${d.avg.toLocaleString()}</td></tr>`;
+  }).join('');
+
+  const mc = {};
+  records.filter(r => r.result && !r.result.error).forEach(r => (r.result.menus||[]).forEach(m => { mc[m]=(mc[m]||0)+1; }));
+  const ranking = Object.entries(mc).sort((a,b) => b[1]-a[1]);
+  document.getElementById('yearly-menu').innerHTML = ranking.length === 0
+    ? '<div style="color:var(--muted);font-size:12px;text-align:center;padding:10px;">データを積み上げると表示されるよ</div>'
+    : ranking.slice(0,15).map(([m,c],i) => `<div class="menu-item"><div class="menu-rank ${i<3?'top':'mid'}">${i+1}</div><div class="menu-name">${m}</div><div class="menu-cnt">${c}回</div></div>`).join('');
+}
+
+// ===== 設定 =====
+function openSettings() {
+  document.getElementById('cfg-salon').value = cfg.salon || '';
+  document.getElementById('cfg-owner').value = cfg.owner || '';
+  document.getElementById('cfg-goal').value = cfg.goal || '';
+  document.getElementById('cfg-menus').value = cfg.menus || '';
+  document.getElementById('cfg-api').value = cfg.api || '';
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function saveSettings() {
+  cfg.salon = document.getElementById('cfg-salon').value.trim() || cfg.salon;
+  cfg.owner = document.getElementById('cfg-owner').value.trim() || cfg.owner;
+  cfg.goal = parseInt(document.getElementById('cfg-goal').value) || cfg.goal;
+  cfg.menus = document.getElementById('cfg-menus').value.trim() || cfg.menus;
+  cfg.api = document.getElementById('cfg-api').value.trim() || cfg.api;
+  persist();
+  document.getElementById('h-salon').textContent = cfg.salon;
+  document.getElementById('h-owner').textContent = cfg.owner + ' さん';
+  updateGoalStrip();
+  closeSettings();
+  alert('設定を保存したよ！');
+}
+function resetApp() {
+  if (!confirm('全データをリセットします。本当によい？')) return;
+  localStorage.removeItem(SK);
+  location.reload();
+}
+
+// ===== 起動 =====
+load();
+if (cfg.api && cfg.salon) {
+  bootMain();
+} else {
+  document.getElementById('setup-screen').style.display = 'flex';
+}
 </script>
 </body>
 </html>
