@@ -778,8 +778,24 @@ async function sendRecord() {
   updateGoalStrip();
 
   // AI分析
+  const loadingMsgs = [
+    '🤖 スクショ読み取り中…',
+    '📊 数字を計算中…',
+    '💡 アドバイスを考えてるよ…',
+    '✨ もうちょっとで完成！',
+    '🎨 仕上げ中…'
+  ];
+  let msgIdx = 0;
+  const loadingEl = document.getElementById(`loading-${rec.id}`);
+  const loadingInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % loadingMsgs.length;
+    const el = document.getElementById(`loading-${rec.id}`);
+    if (el) el.textContent = loadingMsgs[msgIdx];
+  }, 4000);
+
   try {
     const res = await callAI(rec);
+    clearInterval(loadingInterval);
     const idx = records.findIndex(r => r.id === rec.id);
     if (idx !== -1) { records[idx].result = res; persist(); }
     const el = document.getElementById(`result-${rec.id}`);
@@ -787,6 +803,7 @@ async function sendRecord() {
     updateGoalStrip();
     renderMonth();
   } catch (e) {
+    clearInterval(loadingInterval);
     const idx = records.findIndex(r => r.id === rec.id);
     if (idx !== -1) { records[idx].result = { error: true, message: e.message }; persist(); }
     const el = document.getElementById(`result-${rec.id}`);
@@ -897,7 +914,7 @@ function renderHome() {
       ${r.img ? `<img class="chat-img" src="${r.img}" alt="">` : ''}
       ${r.memo ? `<div class="chat-memo">「${r.memo}」</div>` : ''}
       <div id="result-${r.id}">
-        ${r.result ? resultHTML(r.result) : `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div><div style="margin-top:8px">分析中…</div></div>`}
+        ${r.result ? resultHTML(r.result) : `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div><div style="margin-top:10px" id="loading-${r.id}">🤖 スクショ読み取り中…</div><div style="margin-top:6px; font-size:11px; color:#ccc;">だいたい10〜30秒かかるよ☕</div></div>`}
       </div>
     </div>`).join('');
 }
