@@ -454,7 +454,7 @@ body { background: var(--bg); font-family: 'Noto Sans JP', sans-serif; color: va
 <!-- ===== セットアップ ===== -->
 <div id="setup-screen">
   <div class="setup-logo">OBENTOUeye</div>
-  <div class="setup-title">💅 AI経営コーチ</div>
+  <div class="setup-title">👁️ AI経営コーチ</div>
   <div class="setup-sub">一人サロン専用・スクショ送るだけで<br>売上管理＋経営アドバイスが届く</div>
 
   <div class="setup-card">
@@ -498,7 +498,7 @@ body { background: var(--bg); font-family: 'Noto Sans JP', sans-serif; color: va
   <!-- ヘッダー -->
   <div class="app-header">
     <div class="app-header-left">
-      <div class="salon-icon">💅</div>
+      <div class="salon-icon">👁️</div>
       <div>
         <div class="salon-name" id="h-salon">サロン名</div>
         <div class="salon-owner" id="h-owner">オーナー</div>
@@ -788,9 +788,9 @@ async function sendRecord() {
     renderMonth();
   } catch (e) {
     const idx = records.findIndex(r => r.id === rec.id);
-    if (idx !== -1) { records[idx].result = { error: true }; persist(); }
+    if (idx !== -1) { records[idx].result = { error: true, message: e.message }; persist(); }
     const el = document.getElementById(`result-${rec.id}`);
-    if (el) el.innerHTML = `<div style="color:#ccc;font-size:12px;text-align:center;padding:10px;">読み取りに失敗しました😢<br>もう一度送ってみてね</div>`;
+    if (el) el.innerHTML = `<div style="padding:14px;"><div style="background:#fee;border:1px solid #fcc;border-radius:10px;padding:12px;font-size:12px;color:#c33;line-height:1.7;"><b>⚠️ エラー詳細</b><br>${e.message}<br><br><span style="color:#888;font-size:11px;">もう一度送信ボタンで再試行できます</span></div></div>`;
   }
   btn.disabled = false;
 }
@@ -844,11 +844,21 @@ ${rec.img ? '※スクショ画像あり' : '※画像なし'}
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': cfg.api, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, messages: [{ role: 'user', content }] })
   });
   const data = await res.json();
+  if (!res.ok || data.error) {
+    throw new Error(data.error?.message || 'APIエラー (ステータス: ' + res.status + ')');
+  }
+  if (!data.content || !data.content[0]) {
+    throw new Error('APIレスポンスが空でした');
+  }
   const text = data.content[0].text.replace(/```json|```/g, '').trim();
-  return JSON.parse(text);
+  try {
+    return JSON.parse(text);
+  } catch (parseErr) {
+    throw new Error('AIの返答がJSON形式じゃなかった: ' + text.slice(0, 100));
+  }
 }
 
 // ===== 結果HTML =====
@@ -1043,9 +1053,14 @@ function saveSettings() {
   alert('設定を保存したよ！');
 }
 function resetApp() {
-  if (!confirm('全データをリセットします。本当によい？')) return;
-  localStorage.removeItem(SK);
-  location.reload();
+  const ok = confirm('⚠️ 本当にリセットしますか？\n\nサロン情報・APIキー・全記録が消えます。\n（この操作は取り消せません）');
+  if (!ok) return;
+  try {
+    localStorage.removeItem(SK);
+    localStorage.clear();
+  } catch(e) {}
+  alert('リセットしました。ページを再読み込みします。');
+  setTimeout(() => { location.reload(); }, 300);
 }
 
 // ===== 起動 =====
