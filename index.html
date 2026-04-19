@@ -728,12 +728,35 @@ document.addEventListener('paste', e => { const items = e.clipboardData?.items; 
 function loadImg(file) {
   const reader = new FileReader();
   reader.onload = e => {
-    selImg = e.target.result;
-    const thumb = document.getElementById('preview-thumb');
-    thumb.src = selImg; thumb.style.display = 'block';
-    document.getElementById('drop-label').style.display = 'none';
-    document.getElementById('drop-clear').style.display = 'block';
-    dz.classList.add('has-img');
+    // 画像を圧縮する
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 1200;
+      let w = img.width;
+      let h = img.height;
+      if (w > MAX_WIDTH) {
+        h = h * (MAX_WIDTH / w);
+        w = MAX_WIDTH;
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      // JPEG 80%品質で圧縮
+      selImg = canvas.toDataURL('image/jpeg', 0.8);
+
+      const thumb = document.getElementById('preview-thumb');
+      thumb.src = selImg; thumb.style.display = 'block';
+      document.getElementById('drop-label').style.display = 'none';
+      document.getElementById('drop-clear').style.display = 'block';
+      dz.classList.add('has-img');
+
+      // 画像サイズ確認ログ
+      const sizeKB = Math.round(selImg.length * 0.75 / 1024);
+      console.log(`画像サイズ: ${sizeKB}KB (圧縮後)`);
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -858,14 +881,39 @@ ${rec.img ? '※スクショ画像あり' : '※画像なし'}
   }
   content.push({ type: 'text', text: prompt });
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': cfg.api, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, messages: [{ role: 'user', content }] })
-  });
-  const data = await res.json();
+  // タイムアウト90秒
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 90000);
+
+  let res;
+  try {
+    res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': cfg.api, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, messages: [{ role: 'user', content }] }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+  } catch (fetchErr) {
+    clearTimeout(timeoutId);
+    if (fetchErr.name === 'AbortError') {
+      throw new Error('タイムアウト（90秒）。画像サイズが大きすぎるかも。別のスクショで試してみて！');
+    }
+    throw new Error('ネットワークエラー: ' + fetchErr.message + '\n(Wi-Fi接続を確認してみて)');
+  }
+
+  let data;
+  try {
+    data = await res.json();
+  } catch(jsonErr) {
+    throw new Error('レスポンスのJSON解析失敗 (ステータス: ' + res.status + ')');
+  }
   if (!res.ok || data.error) {
-    throw new Error(data.error?.message || 'APIエラー (ステータス: ' + res.status + ')');
+    const errMsg = data.error?.message || 'ステータス: ' + res.status;
+    if (res.status === 401) throw new Error('APIキーが正しくないか無効です。設定画面で確認してね');
+    if (res.status === 429) throw new Error('API使用量の上限。少し待ってから再試行してね');
+    if (res.status === 400) throw new Error('リクエストエラー: ' + errMsg);
+    throw new Error(errMsg);
   }
   if (!data.content || !data.content[0]) {
     throw new Error('APIレスポンスが空でした');
